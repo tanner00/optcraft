@@ -1,5 +1,7 @@
 optcraft
 build
+.vscode
+
 
 # Prerequisites
 *.d
