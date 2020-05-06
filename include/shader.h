@@ -1,14 +1,18 @@
+#pragma once
+
 #include <glad/glad.h>
-#include <string>
+#include <string_view>
 
 class Shader {
     private:
-	GLuint program;
+	GLuint m_program;
 
     public:
-	Shader(const std::string &&vertex_shader_path,
-	       const std::string &&fragment_shader_path);
+	Shader(std::string_view vertex_shader_path,
+	       std::string_view fragment_shader_path);
 	~Shader();
+
+	void set_uniform(std::string_view name, float value);
 
 	void bind();
 	void unbind();

@@ -1,12 +1,11 @@
+#include "shader.h"
 #include <glad/glad.h>
 
-#include "shader.h"
 #include <GLFW/glfw3.h>
 #include <cassert>
-#include <iostream>
 
-const int WINDOW_WIDTH = 1024;
-const int WINDOW_HEIGHT = 640;
+constexpr int WINDOW_WIDTH = 1024;
+constexpr int WINDOW_HEIGHT = 640;
 
 int main() {
 
@@ -22,7 +21,8 @@ int main() {
 	assert(window);
 	glfwMakeContextCurrent(window);
 
-	assert(gladLoadGLLoader((GLADloadproc)glfwGetProcAddress));
+	assert(gladLoadGLLoader(
+		reinterpret_cast<GLADloadproc>(glfwGetProcAddress)));
 
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
@@ -30,6 +30,7 @@ int main() {
 		-0.3f, 0.6f, 0.0f, 0.6f, 0.7f, 0.0f, 0.3f, 0.1f, 0.0f,
 	};
 
+	// @TODO: abstract these and delete them
 	GLuint vao;
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
@@ -45,23 +46,34 @@ int main() {
 
 	glBindVertexArray(0);
 
-	Shader shader{"src/shaders/vertex.glsl", "src/shaders/fragment.glsl"};
+	{
+		Shader shader{"src/shaders/vertex.glsl",
+			      "src/shaders/fragment.glsl"};
 
-	while (!glfwWindowShouldClose(window)) {
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		// remove the copy constructor, this shouldn't be needed anyways
+		// { auto x = shader; }
 
-		shader.bind();
+		while (!glfwWindowShouldClose(window)) {
+			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT);
 
-		glBindVertexArray(vao);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
-		glBindVertexArray(0);
+			shader.bind();
 
-		shader.unbind();
+			shader.set_uniform("x", 0.2f);
 
-		glfwSwapBuffers(window);
-		glfwPollEvents();
+			glBindVertexArray(vao);
+			glDrawArrays(GL_TRIANGLES, 0, 3);
+			glBindVertexArray(0);
+
+			shader.unbind();
+
+			glfwSwapBuffers(window);
+			glfwPollEvents();
+		}
 	}
+
+	glDeleteBuffers(1, &vbo);
+	glDeleteVertexArrays(1, &vao);
 
 	glfwTerminate();
 
